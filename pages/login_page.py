@@ -1,22 +1,36 @@
+import allure
+from selenium.webdriver.remote.webdriver import WebDriver
 from pages.base_page import BasePage
 from locators import LoginPageLocators
-from data import USER_EMAIL, USER_PASSWORD
+
 
 class LoginPage(BasePage):
-    # Ввод email
-    def input_email(self, email=USER_EMAIL):
+    """PageObject для страницы логина"""
+
+    def __init__(self, driver: WebDriver):
+        super().__init__(driver)
+
+    @allure.step("Вводим email: {email}")
+    def enter_email(self, email: str) -> None:
+        """Вводит email пользователя"""
         self.input_text(LoginPageLocators.EMAIL_INPUT, email)
 
-    # Ввод пароля
-    def input_password(self, password=USER_PASSWORD):
+    @allure.step("Вводим пароль")
+    def enter_password(self, password: str) -> None:
+        """Вводит пароль пользователя"""
         self.input_text(LoginPageLocators.PASSWORD_INPUT, password)
 
-    # Нажать кнопку "Войти"
-    def submit_login(self):
-        self.click(LoginPageLocators.SUBMIT_BUTTON)
+    @allure.step("Нажимаем кнопку 'Войти'")
+    def click_login_button(self) -> None:
+        """Кликает по кнопке входа"""
+        self.click(LoginPageLocators.LOGIN_BUTTON)
 
-    # Полный процесс авторизации
-    def login(self, email=USER_EMAIL, password=USER_PASSWORD):
-        self.input_email(email)
-        self.input_password(password)
-        self.submit_login()
+    @allure.step("Переход на страницу регистрации")
+    def go_to_register(self) -> None:
+        """Кликает на ссылку 'Зарегистрироваться'"""
+        self.click(LoginPageLocators.REGISTER_LINK)
+
+    @allure.step("Получаем сообщение об ошибке")
+    def get_error_message(self) -> str:
+        """Возвращает текст ошибки"""
+        return self.get_text(LoginPageLocators.ERROR_MESSAGE)
