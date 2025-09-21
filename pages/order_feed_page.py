@@ -1,36 +1,31 @@
-import allure
-from selenium.webdriver.remote.webdriver import WebDriver
 from pages.base_page import BasePage
-from locators import OrderFeedPageLocators
-
+from locators.order_feed_page_locators import OrderFeedPageLocators as Locators
+from data import Data
+from selenium.webdriver.common.by import By
+import allure
 
 class OrderFeedPage(BasePage):
-    """PageObject для ленты заказов"""
-
-    def __init__(self, driver: WebDriver):
+    def __init__(self, driver):
         super().__init__(driver)
 
-    @allure.step("Проверяем, отображается ли список заказов")
-    def is_orders_list_visible(self) -> bool:
-        """Возвращает True, если список заказов отображается"""
-        return self.is_visible(OrderFeedPageLocators.ORDERS_LIST)
+    @allure.step("Получение счётчика 'Выполнено за всё время'")
+    def get_all_time_count(self):
+        # Используем локатор из data.py
+        all_time_count_locator = (By.XPATH, f".//p[text()='{Data.ORDERS_TOTAL_TEXT}']/following-sibling::p")
+        count_element = self.find_element(*all_time_count_locator)
+        return int(count_element.text.replace(',', ''))
 
-    @allure.step("Проверяем, отображается ли счётчик 'Выполнено за всё время'")
-    def is_total_counter_visible(self) -> bool:
-        """Возвращает True, если отображается счётчик 'Выполнено за всё время'"""
-        return self.is_visible(OrderFeedPageLocators.TOTAL_COUNTER)
+    @allure.step("Получение счётчика 'Выполнено за сегодня'")
+    def get_today_count(self):
+        # Используем локатор из data.py
+        today_count_locator = (By.XPATH, f".//p[text()='{Data.ORDERS_TODAY_TEXT}']/following-sibling::p")
+        count_element = self.find_element(*today_count_locator)
+        return int(count_element.text)
 
-    @allure.step("Проверяем, отображается ли счётчик 'Выполнено за сегодня'")
-    def is_today_counter_visible(self) -> bool:
-        """Возвращает True, если отображается счётчик 'Выполнено за сегодня'"""
-        return self.is_visible(OrderFeedPageLocators.TODAY_COUNTER)
-
-    @allure.step("Открываем первый заказ из ленты")
-    def open_first_order(self) -> None:
-        """Кликает на первый заказ в списке"""
-        self.click(OrderFeedPageLocators.FIRST_ORDER)
-
-    @allure.step("Проверяем, открыто ли модальное окно заказа")
-    def is_order_modal_visible(self) -> bool:
-        """Возвращает True, если модальное окно заказа отображается"""
-        return self.is_visible(OrderFeedPageLocators.ORDER_MODAL)
+    @allure.step("Получение последнего номера заказа в разделе 'В работе'")
+    def get_last_order_in_progress(self):
+        order_list = self.find_element(*Locators.ORDER_LIST_IN_PROGRESS)
+        if order_list:
+            orders = order_list.find_elements(*Locators.ORDER_NUMBER_IN_PROGRESS)
+            return int(orders[0].text) if orders else None
+        return None

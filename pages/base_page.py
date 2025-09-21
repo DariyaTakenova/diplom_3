@@ -1,62 +1,21 @@
-import allure
-from typing import Tuple
-from selenium.webdriver.remote.webdriver import WebDriver
-from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-
+from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.remote.webdriver import WebDriver
+from selenium.webdriver.common.action_chains import ActionChains
 
 class BasePage:
-    """Базовый класс для всех PageObject"""
-
     def __init__(self, driver: WebDriver):
         self.driver = driver
-        self.wait = WebDriverWait(driver, 10)
+        self.wait = WebDriverWait(self.driver, 10)
 
-    @allure.step("Клик по элементу {locator}")
-    def click(self, locator: Tuple[str, str]) -> None:
-        """Ожидание кликабельности и клик по элементу"""
-        element = self.wait.until(
-            EC.element_to_be_clickable(locator),
-            message=f"Элемент {locator} не кликабелен"
-        )
-        element.click()
+    def find_element(self, by, value):
+        return self.wait.until(EC.visibility_of_element_located((by, value)))
 
-    @allure.step("Ввод текста в элемент {locator}")
-    def input_text(self, locator: Tuple[str, str], text: str) -> None:
-        """Ожидание видимости поля, очистка и ввод текста"""
-        element: WebElement = self.wait.until(
-            EC.visibility_of_element_located(locator),
-            message=f"Элемент {locator} не найден для ввода текста"
-        )
-        element.clear()
-        element.send_keys(text)
+    def click_element(self, by, value):
+        self.wait.until(EC.element_to_be_clickable((by, value))).click()
 
-    @allure.step("Получение текста из элемента {locator}")
-    def get_text(self, locator: Tuple[str, str]) -> str:
-        """Ожидание видимости и возврат текста элемента"""
-        element: WebElement = self.wait.until(
-            EC.visibility_of_element_located(locator),
-            message=f"Элемент {locator} не найден для получения текста"
-        )
-        return element.text
-
-    @allure.step("Ожидание видимости элемента {locator}")
-    def wait_for_visible(self, locator: Tuple[str, str]) -> WebElement:
-        """Ожидает, что элемент появится на странице"""
-        return self.wait.until(
-            EC.visibility_of_element_located(locator),
-            message=f"Элемент {locator} не найден"
-        )
-
-    @allure.step("Проверка, отображается ли элемент {locator}")
-    def is_visible(self, locator: Tuple[str, str]) -> bool:
-        """Возвращает True, если элемент отображается"""
-        try:
-            self.wait.until(
-                EC.visibility_of_element_located(locator),
-                message=f"Элемент {locator} не отображается"
-            )
-            return True
-        except Exception:
-            return False
+    def drag_and_drop_element(self, source_locator, target_locator):
+        source_element = self.find_element(*source_locator)
+        target_element = self.find_element(*target_locator)
+        ActionChains(self.driver).drag_and_drop(source_element, target_element).perform()

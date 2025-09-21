@@ -1,50 +1,57 @@
+import pytest
 import allure
 from pages.main_page import MainPage
 from pages.order_feed_page import OrderFeedPage
+from urls import Urls
+from locators.main_page_locators import MainPageLocators as Locators
+from locators.order_feed_page_locators import OrderFeedPageLocators as OrderLocators
 
 
-@allure.feature("Лента заказов")
+@allure.suite("Тесты ленты заказов")
+@pytest.mark.usefixtures("driver")
 class TestOrderFeed:
+    @allure.title("Проверка, что при создании заказа увеличивается счётчик 'Выполнено за всё время'")
+    def test_all_time_count_increases(self, driver):
+        driver.get(Urls.FEED_ORDERS_PAGE)
+        order_feed_page = OrderFeedPage(driver)
+        initial_count = order_feed_page.get_all_time_count()
 
-    @allure.story("Отображение ленты заказов")
-    def test_orders_list_is_visible(self, driver):
+        driver.get(Urls.MAIN_PAGE)
         main_page = MainPage(driver)
-        order_feed = OrderFeedPage(driver)
+        main_page.drag_and_drop_ingredient()
+        main_page.make_order()
 
-        with allure.step("Открыть ленту заказов"):
-            main_page.open_order_feed()
+        driver.get(Urls.FEED_ORDERS_PAGE)
+        updated_count = order_feed_page.get_all_time_count()
+        assert updated_count > initial_count, "Счётчик 'Выполнено за всё время' не увеличился."
 
-        with allure.step("Проверить, что список заказов отображается"):
-            assert order_feed.is_orders_list_visible(), "Лента заказов не отображается"
+    @allure.title("Проверка, что при создании заказа увеличивается счётчик 'Выполнено за сегодня'")
+    def test_today_count_increases(self, driver):
+        driver.get(Urls.FEED_ORDERS_PAGE)
+        order_feed_page = OrderFeedPage(driver)
+        initial_count = order_feed_page.get_today_count()
 
-    @allure.story("Счётчики заказов увеличиваются при новом заказе")
-    def test_orders_counters_increase(self, driver):
+        driver.get(Urls.MAIN_PAGE)
         main_page = MainPage(driver)
-        order_feed = OrderFeedPage(driver)
+        main_page.drag_and_drop_ingredient()
+        main_page.make_order()
 
-        with allure.step("Открыть ленту заказов"):
-            main_page.open_order_feed()
+        driver.get(Urls.FEED_ORDERS_PAGE)
+        updated_count = order_feed_page.get_today_count()
+        assert updated_count > initial_count, "Счётчик 'Выполнено за сегодня' не увеличился."
 
-        with allure.step("Запомнить количество выполненных заказов"):
-            before = order_feed.get_completed_orders_count()
-
-        with allure.step("Подождать появления нового заказа (или имитировать заказ)"):
-            order_feed.wait_for_new_order(before)
-
-        with allure.step("Проверить, что количество заказов увеличилось"):
-            after = order_feed.get_completed_orders_count()
-            assert after > before, "Счётчик заказов не увеличился"
-
-    @allure.story("Открытие модалки заказа")
-    def test_order_modal_window_opens(self, driver):
+    @allure.title("Проверка, что после оформления заказа его номер появляется в разделе 'В работе'")
+    def test_order_number_appears_in_in_progress_section(self, driver):
+        driver.get(Urls.MAIN_PAGE)
         main_page = MainPage(driver)
-        order_feed = OrderFeedPage(driver)
+        main_page.drag_and_drop_ingredient()
+        main_page.make_order()
 
-        with allure.step("Открыть ленту заказов"):
-            main_page.open_order_feed()
+        order_number_text = main_page.find_element(*Locators.ORDER_NUMBER_POPUP).text
+        order_number = int(order_number_text)
 
-        with allure.step("Кликнуть на первый заказ в списке"):
-            order_feed.click_first_order()
+        driver.get(Urls.FEED_ORDERS_PAGE)
+        order_feed_page = OrderFeedPage(driver)
+        last_order_in_progress = order_feed_page.get_last_order_in_progress()
 
-        with allure.step("Проверить, что открылась модалка заказа"):
-            assert order_feed.is_order_modal_visible(), "Модальное окно заказа не открылось"
+        assert last_order_in_progress == order_number, "Номер заказа не появился в разделе 'В работе'."
