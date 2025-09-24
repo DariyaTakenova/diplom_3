@@ -1,31 +1,18 @@
 from pages.base_page import BasePage
-from locators.order_feed_page_locators import OrderFeedPageLocators as Locators
-from data import Data
-from selenium.webdriver.common.by import By
-import allure
+from locators.order_feed_page_locators import OrderLocators
+from selenium.webdriver.support import expected_conditions as EC
+
 
 class OrderFeedPage(BasePage):
-    def __init__(self, driver):
-        super().__init__(driver)
-
-    @allure.step("Получение счётчика 'Выполнено за всё время'")
     def get_all_time_count(self):
-        # Используем локатор из data.py
-        all_time_count_locator = (By.XPATH, f".//p[text()='{Data.ORDERS_TOTAL_TEXT}']/following-sibling::p")
-        count_element = self.find_element(*all_time_count_locator)
-        return int(count_element.text.replace(',', ''))
+        count_str = self.get_element_text(OrderLocators.TOTAL_ORDERS_COUNTER[0], OrderLocators.TOTAL_ORDERS_COUNTER[1])
+        return int(count_str.replace(',', ''))
 
-    @allure.step("Получение счётчика 'Выполнено за сегодня'")
     def get_today_count(self):
-        # Используем локатор из data.py
-        today_count_locator = (By.XPATH, f".//p[text()='{Data.ORDERS_TODAY_TEXT}']/following-sibling::p")
-        count_element = self.find_element(*today_count_locator)
-        return int(count_element.text)
+        count_str = self.get_element_text(OrderLocators.TODAY_ORDERS_COUNTER[0], OrderLocators.TODAY_ORDERS_COUNTER[1])
+        return int(count_str)
 
-    @allure.step("Получение последнего номера заказа в разделе 'В работе'")
-    def get_last_order_in_progress(self):
-        order_list = self.find_element(*Locators.ORDER_LIST_IN_PROGRESS)
-        if order_list:
-            orders = order_list.find_elements(*Locators.ORDER_NUMBER_IN_PROGRESS)
-            return int(orders[0].text) if orders else None
-        return None
+    def get_in_progress_order_numbers(self):
+        self.wait.until(EC.presence_of_all_elements_located(OrderLocators.IN_PROGRESS_ORDERS_LIST))
+        elements = self.driver.find_elements(*OrderLocators.IN_PROGRESS_ORDERS_LIST)
+        return [int(e.text) for e in elements if e.text.isdigit()]

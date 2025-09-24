@@ -1,32 +1,31 @@
 from pages.base_page import BasePage
-from locators.main_page_locators import MainPageLocators as Locators
-import allure
+from locators.main_page_locators import MainLocators
+
 
 class MainPage(BasePage):
-    def __init__(self, driver):
-        super().__init__(driver)
-
-    @allure.step("Клик по кнопке 'Лента заказов'")
-    def click_feed_orders(self):
-        self.click_element(*Locators.FEED_ORDERS_BUTTON)
-
-    @allure.step("Клик по кнопке 'Конструктор'")
-    def click_constructor(self):
-        self.click_element(*Locators.CONSTRUCTOR_BUTTON)
-
-    @allure.step("Клик по ингредиенту")
-    def click_ingredient(self):
-        self.click_element(*Locators.INGREDIENT)
-
-    @allure.step("Закрытие модального окна")
-    def close_modal(self):
-        self.click_element(*Locators.MODAL_CLOSE_BUTTON)
-
-    @allure.step("Перетаскивание ингредиента в корзину")
     def drag_and_drop_ingredient(self):
-        self.drag_and_drop_element(Locators.INGREDIENT, Locators.BASKET_AREA)
+        self.drag_and_drop_element(MainLocators.INGREDIENT, MainLocators.BASKET_AREA)
 
-    @allure.step("Создание заказа")
-    def make_order(self):
-        self.click_element(*Locators.MAKE_ORDER_BUTTON)
-        self.wait.until(EC.visibility_of_element_located(Locators.ORDER_NUMBER_POPUP))
+    def click_create_order_button(self):
+        self.wait_and_click(MainLocators.CREATE_ORDER_BUTTON[0], MainLocators.CREATE_ORDER_BUTTON[1])
+
+    def get_order_number(self):
+        return self.get_element_text(MainLocators.ORDER_NUMBER_POPUP[0], MainLocators.ORDER_NUMBER_POPUP[1])
+
+    def close_modal(self):
+        self.wait_and_click(MainLocators.MODAL_CLOSE_BUTTON[0], MainLocators.MODAL_CLOSE_BUTTON[1])
+
+    def get_ingredient_count(self):
+        return int(self.get_element_text(MainLocators.INGREDIENT_COUNTER[0], MainLocators.INGREDIENT_COUNTER[1]))
+
+    def click_ingredient(self):
+        self.wait_and_click(MainLocators.INGREDIENT[0], MainLocators.INGREDIENT[1])
+
+    def is_modal_open(self):
+        return self.is_element_present(MainLocators.MODAL_DETAILS[0], MainLocators.MODAL_DETAILS[1])
+
+    def click_constructor(self):
+        self.wait_and_click(MainLocators.CONSTRUCTOR_BUTTON[0], MainLocators.CONSTRUCTOR_BUTTON[1])
+
+    def click_feed_orders(self):
+        self.wait_and_click(MainLocators.FEED_ORDERS_BUTTON[0], MainLocators.FEED_ORDERS_BUTTON[1])
