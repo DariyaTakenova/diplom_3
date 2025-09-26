@@ -1,22 +1,9 @@
-# Python
 __pycache__/
 *.pyc
-*.pyo
-*.pyd
-*.log
-
-# Virtualenv
-.venv/
-env/
+/.idea
+/.vscode
+/.pytest_cache
+/.venv
 venv/
-
-# Pytest cache
-.pytest_cache/
-
-# Allure
+.env
 allure-results/
-allure-report/
-
-# IDE
-.idea/
-.vscode/

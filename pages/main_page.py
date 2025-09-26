@@ -1,31 +1,57 @@
+import allure
+from selenium.webdriver.remote.webdriver import WebDriver
 from pages.base_page import BasePage
 from locators.main_page_locators import MainLocators
 
 
 class MainPage(BasePage):
-    def drag_and_drop_ingredient(self):
+    """Page Object для главной страницы (конструктор бургеров)."""
+
+    def __init__(self, driver: WebDriver) -> None:
+        """Инициализация страницы."""
+        super().__init__(driver)
+
+    @allure.step("Перетаскивание ингредиента в корзину")
+    def drag_and_drop_ingredient(self) -> None:
+        """Перетаскивает первый ингредиент в область корзины."""
         self.drag_and_drop_element(MainLocators.INGREDIENT, MainLocators.BASKET_AREA)
 
-    def click_create_order_button(self):
-        self.wait_and_click(MainLocators.CREATE_ORDER_BUTTON[0], MainLocators.CREATE_ORDER_BUTTON[1])
+    @allure.step("Клик по кнопке 'Оформить заказ'")
+    def click_create_order_button(self) -> None:
+        """Нажимает на кнопку оформления заказа."""
+        self.wait_and_click(*MainLocators.CREATE_ORDER_BUTTON)
 
-    def get_order_number(self):
-        return self.get_element_text(MainLocators.ORDER_NUMBER_POPUP[0], MainLocators.ORDER_NUMBER_POPUP[1])
+    @allure.step("Получение номера заказа из всплывающего окна")
+    def get_order_number(self) -> str:
+        """Возвращает номер созданного заказа из модального окна."""
+        return self.get_element_text(*MainLocators.ORDER_NUMBER_POPUP)
 
-    def close_modal(self):
-        self.wait_and_click(MainLocators.MODAL_CLOSE_BUTTON[0], MainLocators.MODAL_CLOSE_BUTTON[1])
+    @allure.step("Закрытие модального окна")
+    def close_modal(self) -> None:
+        """Закрывает модальное окно заказа или деталей ингредиента."""
+        self.wait_and_click(*MainLocators.MODAL_CLOSE_BUTTON)
 
-    def get_ingredient_count(self):
-        return int(self.get_element_text(MainLocators.INGREDIENT_COUNTER[0], MainLocators.INGREDIENT_COUNTER[1]))
+    @allure.step("Получение счётчика выбранного ингредиента")
+    def get_ingredient_count(self) -> int:
+        """Возвращает количество выбранного ингредиента."""
+        return int(self.get_element_text(*MainLocators.INGREDIENT_COUNTER))
 
-    def click_ingredient(self):
-        self.wait_and_click(MainLocators.INGREDIENT[0], MainLocators.INGREDIENT[1])
+    @allure.step("Клик по ингредиенту для открытия модального окна")
+    def click_ingredient(self) -> None:
+        """Открывает карточку ингредиента (модальное окно)."""
+        self.wait_and_click(*MainLocators.INGREDIENT)
 
-    def is_modal_open(self):
-        return self.is_element_present(MainLocators.MODAL_DETAILS[0], MainLocators.MODAL_DETAILS[1])
+    @allure.step("Проверка открытия модального окна ингредиента")
+    def is_modal_open(self) -> bool:
+        """Проверяет, открыто ли модальное окно ингредиента."""
+        return self.is_element_present(*MainLocators.MODAL_DETAILS)
 
-    def click_constructor(self):
-        self.wait_and_click(MainLocators.CONSTRUCTOR_BUTTON[0], MainLocators.CONSTRUCTOR_BUTTON[1])
+    @allure.step("Клик по кнопке 'Конструктор'")
+    def click_constructor(self) -> None:
+        """Переход на страницу конструктора."""
+        self.wait_and_click(*MainLocators.CONSTRUCTOR_BUTTON)
 
-    def click_feed_orders(self):
-        self.wait_and_click(MainLocators.FEED_ORDERS_BUTTON[0], MainLocators.FEED_ORDERS_BUTTON[1])
+    @allure.step("Клик по кнопке 'Лента заказов'")
+    def click_feed_orders(self) -> None:
+        """Переход в раздел 'Лента заказов'."""
+        self.wait_and_click(*MainLocators.FEED_ORDERS_BUTTON)
